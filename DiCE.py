@@ -54,6 +54,9 @@ if __name__ == "__main__":
     y = dataset[targetN]
 
     categorical_features = ['AItechnique', 'musicGenre']
+   
+
+
     categorical_transformer = Pipeline(steps=[
                                           ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
                                           ('onehot', OneHotEncoder(handle_unknown='ignore'))])
@@ -67,6 +70,9 @@ if __name__ == "__main__":
                                  transformers=[
                                                ('num', numeric_transformer, numeric_features),
                                                ('cat', categorical_transformer, categorical_features)])
+    
+    ############# ML MODELS ###############
+
     model_reg = ['lr',
                 'dt',
                 'rf',
@@ -134,7 +140,7 @@ if __name__ == "__main__":
         mape.append(smape(target_test, target_pred))
 
 
-#################### PLOT and SCORES ########################
+    #################### PLOT and SCORES ########################
     output_folder = 'Results-%s/Results-%s/%s/Plot/' %(back[pos], mlModel,targetN)
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -182,7 +188,7 @@ if __name__ == "__main__":
     plt.cla()
     plt.close()
 
-################ WRITE RES IN A TXT #################################
+    ################ WRITE RES IN A TXT #################################
 
     original_stdout = sys.stdout
     with open('Results-%s/Results-%s/%s/res.txt' %(back[pos], mlModel,targetN), 'w') as f:
@@ -200,4 +206,30 @@ if __name__ == "__main__":
     sys.stdout = original_stdout
     print('Results saved')
 
+    ####################### DiCE #############################
+    import dice_ml
+    from dice_ml.utils import helpers
+    from sklearn.model_selection import train_test_split
 
+    X = preprocessor.fit_transform(X)
+
+    feature_cat_names = model['preprocessor'].transformers_[1][1]['onehot'].get_feature_names(categorical_features)
+    l= feature_cat_names.tolist()
+    ltot = numeric_features + l
+
+    X = pd.DataFrame(X, columns=ltot)
+    X['output'] = y
+
+    X_train, X_test = train_test_split(X,test_size=0.2,random_state=42,stratify=X['output'])
+
+    dice_train = dice_ml.Data(dataframe=X_train,
+                 continuous_features=numeric_features,
+                 outcome_name='output')
+    
+    m = dice_ml.Model(model=mod_grid,backend='sklearn', model_type='regressor',func=None)
+    exp = dice_ml.Dice(dice_train,m)
+
+    query_instance = X_test.drop(columns="output")
+    dice_exp = exp.generate_counterfactuals(query_instance, total_CFs=4,desired_range=[1,5])
+    # Visualize counterfactual explanation
+    dice_exp.visualize_as_dataframe()
