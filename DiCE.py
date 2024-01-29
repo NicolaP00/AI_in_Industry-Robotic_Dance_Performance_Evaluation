@@ -6,6 +6,7 @@ import seaborn as sns
 import sys
 import statsmodels.api as sm
 from sklearn import metrics
+from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.linear_model import LinearRegression
@@ -54,8 +55,6 @@ if __name__ == "__main__":
     y = dataset[targetN]
 
     categorical_features = ['AItechnique', 'musicGenre']
-   
-
 
     categorical_transformer = Pipeline(steps=[
                                           ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
@@ -231,5 +230,8 @@ if __name__ == "__main__":
 
     query_instance = X_test.drop(columns="output")
     dice_exp = exp.generate_counterfactuals(query_instance, total_CFs=4,desired_range=[1,5])
-    # Visualize counterfactual explanation
-    dice_exp.visualize_as_dataframe()
+
+    #dice_exp.visualize_as_dataframe()
+    if not Path.cwd().joinpath("dice_results").exists():
+        Path.cwd().joinpath("dice_results").mkdir(parents=True)
+    dice_exp.cf_examples_list[0].final_cfs_df.to_csv(path_or_buf=f'dice_results/{targetId}_{mlModel}_counterfactuals.csv', index=False, sep=',')
