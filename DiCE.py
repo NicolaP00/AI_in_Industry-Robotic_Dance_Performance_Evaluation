@@ -41,8 +41,10 @@ if __name__ == "__main__":
 
     back = ['Artistic', 'Scientific']
     pos = 1
+    ds = 'S'
     if (pathCSV == 'datasetArtisticBackground.csv'):
         pos = 0
+        ds = 'A'
 
 
     dataset = pd.read_csv(pathCSV, sep=';')
@@ -209,6 +211,7 @@ if __name__ == "__main__":
     import dice_ml
     from dice_ml.utils import helpers
     from sklearn.model_selection import train_test_split
+    Ncount=5
 
     X = preprocessor.fit_transform(X)
 
@@ -216,7 +219,14 @@ if __name__ == "__main__":
     l= feature_cat_names.tolist()
     ltot = numeric_features + l
 
+    constraints={}
+    
     X = pd.DataFrame(X, columns=ltot)
+
+    desc=X.describe()
+    print(desc)
+    for i in numeric_features:
+        constraints[i]=[desc[i]['min'],desc[i]['max']]
     X['output'] = y
 
     X_train, X_test = train_test_split(X,test_size=0.2,random_state=42,stratify=X['output'])
@@ -229,9 +239,35 @@ if __name__ == "__main__":
     exp = dice_ml.Dice(dice_train,m)
 
     query_instance = X_test.drop(columns="output")
-    dice_exp = exp.generate_counterfactuals(query_instance, total_CFs=4,desired_range=[1,5])
+    dice_exp = exp.generate_counterfactuals(query_instance, total_CFs=Ncount,desired_range=[1,5],permitted_range=constraints)
 
-    #dice_exp.visualize_as_dataframe()
     if not Path.cwd().joinpath("dice_results").exists():
         Path.cwd().joinpath("dice_results").mkdir(parents=True)
-    dice_exp.cf_examples_list[0].final_cfs_df.to_csv(path_or_buf=f'dice_results/{targetId}_{mlModel}_counterfactuals.csv', index=False, sep=',')
+    data = []
+    for cf_example in dice_exp.cf_examples_list:
+        data.append(cf_example.final_cfs_df)
+
+    df_combined = pd.concat(data, ignore_index=True)
+    for i in range(len(df_combined)):
+        df_combined.iloc[i] = df_combined.iloc[i] - X_test.iloc[i//Ncount]
+    df_combined.to_csv(path_or_buf=f'dice_results/{targetId}_{mlModel}__{ds}_counterfactuals.csv', index=False, sep=',')
+    df_combined.dtypes
+    df_filtered = df_combined[df_combined['output'] != 0]
+    count_per_column = df_filtered.apply(lambda x: (x != 0).sum())
+    print(count_per_column)
+
+    correlation_matrix = df_combined.corr()
+    plt.figure(figsize=(15, 12))
+    sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=.5)
+    plt.title("Correlation")
+
+    plt.savefig(f'dice_results/{targetId}_{mlModel}_{ds}_correlations.png')
+
+    original_stdout = sys.stdout
+    with open(f'dice_results/{targetId}_{mlModel}__{ds}_count.txt', 'w') as f:
+        sys.stdout = f
+        print('\n--------------------- Counterfactual counts:-------------------------')
+        print(count_per_column)
+            
+        
+    sys.stdout = original_stdout
