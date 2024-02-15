@@ -53,7 +53,7 @@ if __name__ == "__main__":
     list_ind_t = index_target.columns.values.tolist()
     targetN = list_ind_t[targetId]
 
-    X = dataset[['timeDuration', 'nMovements', 'movementsDifficulty', 'AItechnique', 'robotSpeech',    'acrobaticMovements', 'movementsRepetition', 'musicGenre', 'movementsTransitionsDuration', 'humanMovements', 'balance', 'speed', 'bodyPartsCombination', 'musicBPM', 'sameStartEndPositionPlace', 'headMovement', 'armsMovement', 'handsMovement', 'legsMovement', 'feetMovement']]
+    X = dataset[['timeDuration', 'nMovements', 'movementsDifficulty', 'AItechnique', 'robotSpeech', 'acrobaticMovements', 'movementsRepetition', 'musicGenre', 'movementsTransitionsDuration', 'humanMovements', 'balance', 'speed', 'bodyPartsCombination', 'musicBPM', 'sameStartEndPositionPlace', 'headMovement', 'armsMovement', 'handsMovement', 'legsMovement', 'feetMovement']]
     y = dataset[targetN]
 
     categorical_features = ['AItechnique', 'musicGenre']
@@ -62,7 +62,7 @@ if __name__ == "__main__":
                                           ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
                                           ('onehot', OneHotEncoder(handle_unknown='ignore'))])
 
-    numeric_features = ['timeDuration', 'nMovements', 'movementsDifficulty', 'robotSpeech',    'acrobaticMovements', 'movementsRepetition', 'movementsTransitionsDuration', 'humanMovements', 'balance', 'speed', 'bodyPartsCombination', 'musicBPM', 'sameStartEndPositionPlace', 'headMovement', 'armsMovement', 'handsMovement', 'legsMovement', 'feetMovement']
+    numeric_features = ['timeDuration', 'nMovements', 'movementsDifficulty', 'robotSpeech', 'acrobaticMovements', 'movementsRepetition', 'movementsTransitionsDuration', 'humanMovements', 'balance', 'speed', 'bodyPartsCombination', 'musicBPM', 'sameStartEndPositionPlace', 'headMovement', 'armsMovement', 'handsMovement', 'legsMovement', 'feetMovement']
     numeric_transformer = Pipeline(steps=[
                                       ('imputer', SimpleImputer(strategy='median')),
                                       ('scaler', StandardScaler())])
@@ -211,7 +211,7 @@ if __name__ == "__main__":
     import dice_ml
     from dice_ml.utils import helpers
     from sklearn.model_selection import train_test_split
-    Ncount=5
+    Ncount=3
 
     X = preprocessor.fit_transform(X)
 
@@ -250,11 +250,14 @@ if __name__ == "__main__":
     df_combined = pd.concat(data, ignore_index=True)
     for i in range(len(df_combined)):
         df_combined.iloc[i] = df_combined.iloc[i] - X_test.iloc[i//Ncount]
-    df_combined.to_csv(path_or_buf=f'dice_results/{targetId}_{mlModel}__{ds}_counterfactuals.csv', index=False, sep=',')
+    df_combined.to_csv(path_or_buf=f'dice_results/{targetId}_{mlModel}_{ds}_counterfactuals.csv', index=False, sep=',')
     df_combined.dtypes
     df_filtered = df_combined[df_combined['output'] != 0]
     count_per_column = df_filtered.apply(lambda x: (x != 0).sum())
-    print(count_per_column)
+    diff_per_column = df_filtered.apply(lambda x: (abs(x)*abs(df_filtered['output'])).sum())
+
+    #print(count_per_column)
+    #print(diff_per_column['output'])
 
     correlation_matrix = df_combined.corr()
     plt.figure(figsize=(15, 12))
@@ -264,10 +267,11 @@ if __name__ == "__main__":
     plt.savefig(f'dice_results/{targetId}_{mlModel}_{ds}_correlations.png')
 
     original_stdout = sys.stdout
-    with open(f'dice_results/{targetId}_{mlModel}__{ds}_count.txt', 'w') as f:
+    with open(f'dice_results/{targetId}_{mlModel}_{ds}_count.txt', 'w') as f:
         sys.stdout = f
         print('\n--------------------- Counterfactual counts:-------------------------')
         print(count_per_column)
+        print(diff_per_column)
             
         
     sys.stdout = original_stdout
