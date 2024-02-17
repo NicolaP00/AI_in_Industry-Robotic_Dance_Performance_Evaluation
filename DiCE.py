@@ -235,7 +235,7 @@ if __name__ == "__main__":
                  continuous_features=numeric_features,
                  outcome_name='output')
     
-    m = dice_ml.Model(model=mod_grid,backend='sklearn', model_type='regressor',func=None)
+    m = dice_ml.Model(model=mod_grid.best_estimator_,backend='sklearn', model_type='regressor',func=None)
     exp = dice_ml.Dice(dice_train,m)
 
     query_instance = X_test.drop(columns="output")
@@ -269,9 +269,10 @@ if __name__ == "__main__":
     original_stdout = sys.stdout
     with open(f'dice_results/{targetId}_{mlModel}_{ds}_count.txt', 'w') as f:
         sys.stdout = f
-        print('\n--------------------- Counterfactual counts:-------------------------')
-        print(count_per_column)
+        print('\n--------------------- Counterfactual absolute counts:-------------------------')
         print(diff_per_column)
+        print('\n--------------------- Counterfactual relative counts:-------------------------')
+        print(diff_per_column/count_per_column)
             
         
     sys.stdout = original_stdout
