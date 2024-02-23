@@ -9,6 +9,7 @@ def P_anova(True_labels, Predicted_labels, acc=1):
  
     #True_mean = np.mean(True_labels)
     Predicted_mean = np.mean(Predicted_labels)
+    #True_mean = np.mean(True_labels)
 
     # Total sum of squares (TSS) - Total variability in the dependent variables (y)
     #SST = np.sum((True_labels - True_mean)**2)
@@ -16,6 +17,9 @@ def P_anova(True_labels, Predicted_labels, acc=1):
     SSR = np.sum((Predicted_labels - Predicted_mean)**2)
     # Residual sum of squares (RSS) - Variability in y unexplained by the model
     SSE = np.sum((True_labels - Predicted_labels)**2)
+    #print(f"SST:{SST}")
+    #print(f"SSR:{SSR}")
+    #print(f"SSE:{SSE}")
 
 
 
@@ -121,9 +125,9 @@ def Anova_Decomposition(model, X, y, lf):
             Relevant_one[i] = True'''
     for i in range(len(Two_way_intr)):
         for j in range(len(Two_way_intr[i])):
-            if (Two_way_intr[i][j]<=Alpha) and (i!=j):
+            if (Two_way_intr[i][j]<=Alpha) and (i!=j) and (Relevant[i]==False) and (Relevant[j]==False):
                 Relevant[i] = True
-                Relevant[j] =True
+                Relevant[j] = True
 
     #print(Relevant_one)
     #print(Relevant_two)
