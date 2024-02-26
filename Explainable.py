@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import sys
-from sklearn import metrics
 from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
@@ -12,6 +11,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 import warnings
 import os
+from pathlib import Path
 from ANOVA import *
 
 def smape(y_true, y_pred):
@@ -110,11 +110,6 @@ if __name__ == "__main__":
     kf = KFold(n_splits=k, random_state=None)
     mod_grid = GridSearchCV(models_regression[mlModel]['estimator'], models_regression[mlModel]['param'], cv=5, return_train_score = False, scoring='neg_mean_squared_error', n_jobs = 8)
 
-    mae = []
-    mse = []
-    rmse = []
-    mape = []
-
     for train_index , test_index in kf.split(X):
         data_train , data_test = X.iloc[train_index,:],X.iloc[test_index,:]
         target_train , target_test = y[train_index] , y[test_index]
@@ -124,13 +119,6 @@ if __name__ == "__main__":
 
 
         _ = model.fit(data_train, target_train)
-
-        target_pred = model.predict(data_test)
-    
-        mae.append(metrics.mean_absolute_error(target_test, target_pred))
-        mse.append(metrics.mean_squared_error(target_test, target_pred))
-        rmse.append(np.sqrt(metrics.mean_squared_error(target_test, target_pred)))
-        mape.append(smape(target_test, target_pred))
 
     
     ######### PREPROCESSING ###########
@@ -154,5 +142,17 @@ if __name__ == "__main__":
     X = pd.DataFrame(X, columns=ltot)
     print(X.median())
 
+    if not Path.cwd().joinpath("Anova_results").exists():
+        Path.cwd().joinpath("Anova_results").mkdir(parents=True)
+
     Anova_results = Anova_Decomposition(mod_grid.best_estimator_, X, y, lf)
     #f_statistic, p_values = f_regression(X, y)
+    original_stdout = sys.stdout
+    with open(f'Anova_results/{targetId}_{mlModel}_{ds}.txt', 'w') as f:
+        sys.stdout = f
+        print('\n--------------------- Anova Lasso Results:-------------------------')
+        for i in Anova_results:
+            print(i)
+            
+        
+    sys.stdout = original_stdout
