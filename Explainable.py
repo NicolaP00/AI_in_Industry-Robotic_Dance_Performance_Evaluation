@@ -140,7 +140,7 @@ if __name__ == "__main__":
     ltot = numeric_features + l
 
     X = pd.DataFrame(X, columns=ltot)
-    print(X.median())
+    #print(X.median())
 
     if not Path.cwd().joinpath("Anova_results").exists():
         Path.cwd().joinpath("Anova_results").mkdir(parents=True)

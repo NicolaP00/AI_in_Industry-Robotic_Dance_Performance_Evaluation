@@ -66,7 +66,7 @@ def Conditions(model, y, X):
         print("Residuals exhibit heteroscedasticity.")
         
 
-def Anova_Decomposition(model, X, y, lf):
+def Anova_Decomposition(model, X, y, lf, Alpha=0.10, r=2):
 
     #model = models_grid.best_estimator_
     #X_preprocessed = preprocessor.fit_transform(X)
@@ -77,7 +77,7 @@ def Anova_Decomposition(model, X, y, lf):
 
     # ANOVA 
     One_way_intr = []
-    Two_way_intr = []
+    Two_way_intr = [[0]*X.shape[1]]*X.shape[1]
     True_labels = np.array(y)
 
     # PART 1 - Oneway interactions 
@@ -89,7 +89,6 @@ def Anova_Decomposition(model, X, y, lf):
 
     # PART 2 - Twoway interactions
     for i in range(X.shape[1]):
-        Two_way_intr = [[0]*X.shape[1]]*X.shape[1]
         for j in range(X.shape[1]):
             if i<j:
                model.fit(X[:,[i, j]], y)
@@ -98,7 +97,7 @@ def Anova_Decomposition(model, X, y, lf):
                Two_way_intr[j][i]=Two_way_intr[i][j]
 
     # PART 3 - Treshold, what we do is checking if p_value is less than alpha
-    Alpha = 0.10 # This is statistical significance value not lasso regularization
+    Relevant_one = [False]*X.shape[1]
     Relevant = [False]*X.shape[1]
     #Relevant_two = [[False]*X.shape[1]]*X.shape[1]
 
@@ -106,28 +105,22 @@ def Anova_Decomposition(model, X, y, lf):
     for i in range(len(One_way_intr)):
         #print(One_way_intr[i])
         if One_way_intr[i] <= Alpha:
-            Relevant[i] = True
+            Relevant_one[i] = True
 
     # Recall treshold
-    #print(Two_way_intr)
-    '''for j,intrs in enumerate(Two_way_intr):
-        count = 0
-        for i in range(len(intrs)):
-            if intrs[i] <= Alpha:
-                count += 1
-        if count >= X.shape[1]//2:
-            Relevant_two[j] = True
-        else:
-            Relevant_two[j] = False
-    
-    for i in range(len(Relevant_two)):
-        if Relevant_two[i] == True:
-            Relevant_one[i] = True'''
-    for i in range(len(Two_way_intr)):
-        for j in range(len(Two_way_intr[i])):
-            if (Two_way_intr[i][j]<=Alpha) and (i!=j) and (Relevant[i]==False) and (Relevant[j]==False):
-                Relevant[i] = True
-                Relevant[j] = True
+    if r==2:
+        for i in range(len(Two_way_intr)):
+            for j in range(len(Two_way_intr[i])):
+                if (Two_way_intr[i][j]<=Alpha) and (i!=j) and (Relevant_one[i]==False) and (Relevant_one[j]==False):
+                    Relevant[i] = True
+                    Relevant[j] = True
+
+    for i in range(len(Relevant_one)):
+        if Relevant_one[i]:
+            Relevant[i]=True
+
+    for i in Two_way_intr:
+        print(i)
 
     #print(Relevant_one)
     #print(Relevant_two)
