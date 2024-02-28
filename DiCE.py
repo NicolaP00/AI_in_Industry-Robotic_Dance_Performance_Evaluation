@@ -8,8 +8,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.compose import ColumnTransformer, make_column_transformer
-from sklearn.pipeline import make_pipeline, Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
@@ -130,9 +130,8 @@ if __name__ == "__main__":
 
     ####################### DiCE #############################
     import dice_ml
-    from dice_ml.utils import helpers
     from sklearn.model_selection import train_test_split
-    Ncount=3
+    Ncount=30
 
     X = preprocessor.fit_transform(X)
 
