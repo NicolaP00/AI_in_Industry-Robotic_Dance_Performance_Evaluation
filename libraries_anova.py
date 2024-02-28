@@ -17,6 +17,8 @@ def P_anova(True_labels, Predicted_labels, acc=1):
     # Residual sum of squares (RSS) - Variability in y unexplained by the model
     SSE = np.sum((True_labels - Predicted_labels)**2)
 
+    #print(TSS==SSR+SSE) 
+
     # Degrees of freedom
     n_samples = len(True_labels)
     df_total = n_samples - 1
