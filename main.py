@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
 import statsmodels.api as sm
+from pathlib import Path
 
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
@@ -25,6 +26,7 @@ import os
 import shutil
 from libraries import create_explanations, summaryPlot, HeatMap_plot, Waterfall, Decision_plot
 from libraries_anova import P_anova, create_dict, Conditions, Anova_Decomposition
+import dice_ml
 
 def smape(y_true, y_pred):
     return 100/len(y_true) * np.sum(np.abs(y_pred - y_true) / (np.abs(y_true) + np.abs(y_pred)))
@@ -48,8 +50,10 @@ if __name__ == "__main__":
 
     back = ['Artistic', 'Scientific']
     pos = 1
+    ds = 'S'
     if (pathCSV == 'datasetArtisticBackground.csv'):
         pos = 0
+        ds = 'A'
 
 
     dataset = pd.read_csv(pathCSV, sep=';')
@@ -263,6 +267,74 @@ if __name__ == "__main__":
     sys.stdout = original_stdout
     shutil.rmtree(os.getcwd() + "\__pycache__")
     print('Results saved')
+
+    ####################### DiCE #############################
+    
+    Ncount=30
+
+    Xdice = preprocessor.fit_transform(X)
+
+    feature_cat_names = model['preprocessor'].transformers_[1][1]['onehot'].get_feature_names(categorical_features)
+    l= feature_cat_names.tolist()
+    ltot = numeric_features + l
+
+    constraints={}
+    
+    Xdice = pd.DataFrame(Xdice, columns=ltot)
+
+    desc=Xdice.describe()
+    #print(desc)
+    for i in numeric_features:
+        constraints[i]=[desc[i]['min'],desc[i]['max']]
+    Xdice['output'] = y
+
+    X_train, X_test = train_test_split(Xdice,test_size=0.2,random_state=42,stratify=Xdice['output'])
+
+    dice_train = dice_ml.Data(dataframe=X_train,
+                 continuous_features=numeric_features,
+                 outcome_name='output')
+    
+    m = dice_ml.Model(model=mod_grid.best_estimator_,backend='sklearn', model_type='regressor',func=None)
+    exp = dice_ml.Dice(dice_train,m)
+
+    query_instance = X_test.drop(columns="output")
+    dice_exp = exp.generate_counterfactuals(query_instance, total_CFs=Ncount,desired_range=[1,5],permitted_range=constraints)
+
+    if not Path.cwd().joinpath("dice_results").exists():
+        Path.cwd().joinpath("dice_results").mkdir(parents=True)
+    data = []
+    for cf_example in dice_exp.cf_examples_list:
+        data.append(cf_example.final_cfs_df)
+
+    df_combined = pd.concat(data, ignore_index=True)
+    for i in range(len(df_combined)):
+        df_combined.iloc[i] = df_combined.iloc[i] - X_test.iloc[i//Ncount]
+    df_combined.to_csv(path_or_buf=f'dice_results/{targetId}_{mlModel}_{ds}_counterfactuals.csv', index=False, sep=',')
+    df_combined.dtypes
+    df_filtered = df_combined[df_combined['output'] != 0]
+    count_per_column = df_filtered.apply(lambda x: (x != 0).sum())
+    diff_per_column = df_filtered.apply(lambda x: (abs(x)*abs(df_filtered['output'])).sum())
+
+    #print(count_per_column)
+    #print(diff_per_column['output'])
+
+    correlation_matrix = df_combined.corr()
+    plt.figure(figsize=(15, 12))
+    sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=.5)
+    plt.title("Correlation")
+
+    plt.savefig(f'dice_results/{targetId}_{mlModel}_{ds}_correlations.png')
+
+    original_stdout = sys.stdout
+    with open(f'dice_results/{targetId}_{mlModel}_{ds}_count.txt', 'w') as f:
+        sys.stdout = f
+        print('\n--------------------- Counterfactual absolute counts:-------------------------')
+        print(diff_per_column)
+        print('\n--------------------- Counterfactual relative counts:-------------------------')
+        print(diff_per_column/count_per_column)
+            
+        
+    sys.stdout = original_stdout
 
     ###### ANOVA DECOMPOSITION #########
     
