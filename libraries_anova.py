@@ -64,7 +64,7 @@ def Conditions(model, y, X):
         print("Residuals exhibit heteroscedasticity.")
         
 
-def Anova_Decomposition(model, X, y, preprocessor, lf):
+def Anova_Decomposition(model, X, y, preprocessor, lf, train_idx = 500):
 
     X_preprocessed = preprocessor.fit_transform(X)
     X = np.array(X_preprocessed)
@@ -74,7 +74,6 @@ def Anova_Decomposition(model, X, y, preprocessor, lf):
     # ANOVA 
     One_way_intr = []
     Two_way_intr = []
-    train_idx = 500
     True_labels = np.array(y)[train_idx:]
 
    # SECOND PART - Oneway interactions 

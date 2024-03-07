@@ -66,7 +66,7 @@ def Conditions(model, y, X):
         print("Residuals exhibit heteroscedasticity.")
         
 
-def Anova_Decomposition(model, X, y, lf, Alpha=0.10, r=2):
+def Anova_Decomposition(model, X, y, lf, Alpha=0.10, r=2, train_idx=500):
 
     #model = models_grid.best_estimator_
     #X_preprocessed = preprocessor.fit_transform(X)
@@ -78,21 +78,21 @@ def Anova_Decomposition(model, X, y, lf, Alpha=0.10, r=2):
     # ANOVA 
     One_way_intr = []
     Two_way_intr = [[0]*X.shape[1]]*X.shape[1]
-    True_labels = np.array(y)
+    True_labels = np.array(y)[train_idx:]
 
     # PART 1 - Oneway interactions 
     for i in range(X.shape[1]):
         # Consider splitting in train / test
-        model.fit(X[:,i].reshape(-1,1), y) 
-        Predicted_labels = model.predict(X[:,i].reshape(-1,1))
+        model.fit(X[:train_idx,i].reshape(-1,1), y[:train_idx]) 
+        Predicted_labels = model.predict(X[train_idx:,i].reshape(-1,1))
         One_way_intr.append(P_anova(True_labels, Predicted_labels))
 
     # PART 2 - Twoway interactions
     for i in range(X.shape[1]):
         for j in range(X.shape[1]):
             if i<j:
-               model.fit(X[:,[i, j]], y)
-               Predicted_labels = model.predict(X[:,[i,j]])
+               model.fit(X[:train_idx,[i, j]], y[:train_idx])
+               Predicted_labels = model.predict(X[train_idx:,[i,j]])
                Two_way_intr[i][j]=P_anova(True_labels, Predicted_labels, acc=2)
                Two_way_intr[j][i]=Two_way_intr[i][j]
 
