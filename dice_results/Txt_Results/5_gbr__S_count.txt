@@ -1,0 +1,31 @@
+
+--------------------- Counterfactual counts:-------------------------
+timeDuration                     21
+nMovements                       30
+movementsDifficulty              35
+robotSpeech                      27
+acrobaticMovements               32
+movementsRepetition              31
+movementsTransitionsDuration     33
+humanMovements                   26
+balance                          29
+speed                            38
+bodyPartsCombination             33
+musicBPM                         29
+sameStartEndPositionPlace        26
+headMovement                     28
+armsMovement                     20
+handsMovement                    41
+legsMovement                     31
+feetMovement                     28
+AItechnique_constraints          15
+AItechnique_planning              9
+AItechnique_searchStartegy        7
+musicGenre_Electronic            12
+musicGenre_Folk                  13
+musicGenre_Indie                 12
+musicGenre_Pop                    7
+musicGenre_Rap                   12
+musicGenre_Rock                  11
+output                          452
+dtype: int64
