@@ -1,0 +1,32 @@
+
+--------------------- Model errors and report:-------------------------
+
+Feature Scores: 
+
+t : 0.014995300154328354
+n : L-Irrelevant
+md : 0.0646164916145803
+rs : P-Irrelevant
+am : P-Irrelevant
+mr : -0.03800882667819126
+mtd : -0.01104664243219485
+h : 0.06441924911403385
+b : L-Irrelevant
+s : -0.025355915870463028
+bc : 0.07382968285519757
+bpm : -0.06558625349099784
+pp : -0.004338792697171354
+hm : 0.06880823812927192
+arm : 0.045614353951387465
+hdm : -0.04548569774395949
+lm : P-Irrelevant
+fm : P-Irrelevant
+AIc : L-Irrelevant
+AIp : 0.15340031323213846
+AIs : P-Irrelevant
+mEl : P-Irrelevant
+mFol : P-Irrelevant
+mInd : P-Irrelevant
+mPop : 0.08268139724358252
+mRap : -0.20302056307539618
+mRock : P-Irrelevant

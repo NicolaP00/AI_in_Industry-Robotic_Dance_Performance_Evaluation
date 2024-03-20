@@ -1,0 +1,39 @@
+
+--------------------- Model errors and report:-------------------------
+Mean Absolute Error: 0.7644882597255377
+Mean Squared Error: 1.0076552153545446
+Root Mean Squared Error: 0.9959874250838222
+Mean Average Percentage Error: 9.920282871110006
+
+Feature Scores: 
+
+                              Coefficients
+timeDuration                      0.122342
+nMovements                        0.013349
+movementsDifficulty               0.000000
+robotSpeech                       0.000000
+acrobaticMovements                0.160088
+movementsRepetition               0.000000
+movementsTransitionsDuration      0.070190
+humanMovements                    0.029798
+balance                           0.015234
+speed                             0.000000
+bodyPartsCombination              0.044349
+musicBPM                          0.154958
+sameStartEndPositionPlace         0.000000
+headMovement                      0.033184
+armsMovement                      0.000000
+handsMovement                     0.009782
+legsMovement                      0.043932
+feetMovement                      0.005590
+AItechnique_constraints           0.108302
+AItechnique_planning              0.000000
+AItechnique_searchStartegy        0.000000
+musicGenre_Electronic             0.000000
+musicGenre_Folk                   0.044909
+musicGenre_Indie                  0.000000
+musicGenre_Pop                    0.000000
+musicGenre_Rap                    0.120443
+musicGenre_Rock                   0.023550
+
+Best Parameters used:  {'max_depth': 5}
