@@ -15,3 +15,22 @@ Tutors: Borghesi Andrea
         De Filippo Allegra
         Giuliani Luca
 
+
+### Scripts
+
+Run each Script as follows: python Script fileCSV targetN Model
+
+fileCSV = datasetArtisticBackground.csv | datasetScientificBackground.csv
+
+targetN = 0 | 1 | 2 | 3 | 4 | 5 | 6
+
+Model = lr | dt | rf | gbr
+
+Script:
+- mainScript.py      (initial script with no explainability technique)
+- main.py            (script with LIME, SHAP, DiCE and ANOVA explanations)
+- DiCE.py            (script with DiCE explanation only)
+- Explainable.py     (script with ANOVA explanation only)
+
+Run DiCE.sh (for all the results) as follows: ./DiCE.sh
+
